@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Private, sideloaded NRK TV client for Samsung Tizen TVs.
+  NRK's PSAPI terms forbid publishing apps built on it, so do not submit this to the Samsung store.
+-->
+<widget xmlns="http://www.w3.org/ns/widgets" xmlns:tizen="http://tizen.org/ns/widgets"
+        id="http://localhost/nrktvprivat" version="1.0.0" viewmodes="maximized">
+    <tizen:application id="NrkTvPriv1.NrkTv" package="NrkTvPriv1" required_version="4.0"/>
+    <content src="index.html"/>
+    <icon src="icon.png"/>
+    <name>NRK TV (privat)</name>
+
+    <!-- Lets the app call psapi.nrk.no, gfx.nrk.no, undertekst.nrk.no and the Akamai CDN without CORS. -->
+    <access origin="*" subdomains="true"/>
+
+    <tizen:privilege name="http://tizen.org/privilege/internet"/>
+    <tizen:privilege name="http://tizen.org/privilege/tv.inputdevice"/>
+    <tizen:profile name="tv-samsung"/>
+    <feature name="http://tizen.org/feature/screen.size.all"/>
+    <tizen:setting screen-orientation="landscape" context-menu="disable" background-support="disable"
+                   encryption="disable" install-location="auto" hwkey-event="enable"/>
+</widget>

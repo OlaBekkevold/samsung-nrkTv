@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1920, initial-scale=1">
+  <title>NRK TV (privat)</title>
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <div id="app">
+    <nav id="menu">
+      <div class="brand">NRK TV</div>
+      <div class="menu-item focusable" data-key="m-front" data-menu="front">Forside</div>
+      <div class="menu-item focusable" data-key="m-cats" data-menu="categories">Kategorier</div>
+      <div class="menu-item focusable" data-key="m-live" data-menu="live">Direkte</div>
+      <div class="menu-item focusable" data-key="m-search" data-menu="search">Søk</div>
+      <div class="menu-hint">Uoffisiell app for privat bruk</div>
+    </nav>
+    <main id="content"></main>
+  </div>
+
+  <div id="player" class="hidden">
+    <video id="video" preload="auto"></video>
+    <div id="subs"></div>
+    <div id="osd">
+      <div class="osd-title"></div>
+      <div class="osd-sub"></div>
+      <div class="osd-bar"><div class="osd-fill"></div></div>
+      <div class="osd-row">
+        <span class="osd-time"></span>
+        <span class="osd-hint">OK: pause · ◀ ▶: spol · ▲: undertekster · Tilbake: lukk</span>
+      </div>
+    </div>
+    <div id="player-msg" class="hidden"></div>
+    <div id="spinner" class="hidden"></div>
+  </div>
+
+  <div id="toast" class="hidden"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/views.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
