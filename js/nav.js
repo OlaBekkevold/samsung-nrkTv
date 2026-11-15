@@ -16,6 +16,14 @@ var Nav = (function () {
 
   var current = null;
   var handlers = []; // stack of key handlers; the top one sees keys first
+  var scale = 1;     // the UI is scaled to fit the screen; see App.fitToScreen
+
+  /* Element rectangle in layout pixels (the 1920x1080 design), independent of the screen scale. */
+  function rect(el) {
+    var r = el.getBoundingClientRect();
+    return { left: r.left / scale, right: r.right / scale, top: r.top / scale, bottom: r.bottom / scale,
+      width: r.width / scale, height: r.height / scale };
+  }
 
   function isVisible(el) {
     return el.offsetParent !== null && !el.closest('.hidden');
@@ -43,18 +51,18 @@ var Nav = (function () {
   function ensureVisible(el) {
     var row = el.closest('.row');
     if (row) {
-      var rr = row.getBoundingClientRect(), er = el.getBoundingClientRect();
+      var rr = rect(row), er = rect(el);
       var pad = 56;
       if (er.right > rr.right - pad) row.scrollLeft += er.right - rr.right + pad;
       else if (er.left < rr.left + 6) row.scrollLeft -= rr.left + 6 - er.left;
     }
     var content = document.getElementById('content');
     if (content.contains(el)) {
-      var cr = content.getBoundingClientRect();
+      var cr = rect(content);
       // Keep the whole section (title + row) in view when possible.
       var block = el.closest('.section') || el;
-      var br = block.getBoundingClientRect();
-      if (br.height > cr.height - 120) br = el.getBoundingClientRect();
+      var br = rect(block);
+      if (br.height > cr.height - 120) br = rect(el);
       if (br.bottom > cr.bottom - 40) content.scrollTop += br.bottom - cr.bottom + 40;
       else if (br.top < cr.top + 30) content.scrollTop -= cr.top + 30 - br.top;
       if (content.scrollTop < 0) content.scrollTop = 0;
@@ -71,12 +79,12 @@ var Nav = (function () {
     var vertical = dir === 'up' || dir === 'down';
     // Up/down inside the side menu never leaves it.
     if (inMenu && vertical) items = items.filter(function (el) { return menu.contains(el); });
-    var cr = current.getBoundingClientRect(), cc = center(cr);
+    var cr = rect(current), cc = center(cr);
     var cands = [];
     for (var i = 0; i < items.length; i++) {
       var el = items[i];
       if (el === current) continue;
-      var r = el.getBoundingClientRect(), c = center(r);
+      var r = rect(el), c = center(r);
       var primary, secondary;
       // Sideways moves stay on the same line, except when going into or out of the menu.
       if (!vertical && !inMenu && !menu.contains(el) && Math.abs(c.y - cc.y) > cr.height / 2) continue;
@@ -115,6 +123,7 @@ var Nav = (function () {
   return {
     focus: focus,
     move: move,
+    setScale: function (s) { scale = s || 1; },
     get current() { return current; },
     focusFirst: function (root) {
       var el = (root || document).querySelector('.focusable');

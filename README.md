@@ -106,6 +106,10 @@ Full documentation: https://psapi.nrk.no/documentation/
 
 ## Compatibility notes
 
+- **Screen resolution:** the UI is designed at 1920×1080 and scaled to fit the screen at startup (and on
+  resize), letterboxed if the aspect ratio differs. 4K Samsung TVs give web apps a 1920×1080 viewport, so
+  they render it unscaled and video still plays in full 4K; HD models (1366×768, 1280×720) get the same
+  layout scaled down. In a desktop browser, any window size works.
 - The JavaScript sticks to ES2017 for the Chromium 56 engine in 2018 TVs: no optional chaining, object spread or
   CSS `inset`. To support 2017 TVs (Tizen 3.0), set `required_version="3.0"` in `config.xml` and test there.
 - If a stream refuses to play in the HTML5 `<video>` element on an older model, Samsung's `webapis.avplay`

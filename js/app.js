@@ -142,7 +142,19 @@ var App = (function () {
     } catch (e) { console.warn('Key registration failed', e); }
   }
 
+  /* Scale the 1920x1080 design to the actual screen, letterboxed if the aspect ratio differs.
+     4K Samsung TVs give web apps a 1920x1080 viewport (scale 1); HD models and browser windows differ. */
+  function fitToScreen() {
+    var w = window.innerWidth || 1920, h = window.innerHeight || 1080;
+    var s = Math.min(w / 1920, h / 1080);
+    var x = Math.round((w - 1920 * s) / 2), y = Math.round((h - 1080 * s) / 2);
+    document.body.style.transform = s === 1 ? '' : 'translate(' + x + 'px,' + y + 'px) scale(' + s + ')';
+    Nav.setScale(s);
+  }
+
   function init() {
+    fitToScreen();
+    window.addEventListener('resize', fitToScreen);
     registerTvKeys();
     Nav.push(browseKeys);
     // Mouse/pointer support (Samsung Smart Remote pointer, desktop testing).
