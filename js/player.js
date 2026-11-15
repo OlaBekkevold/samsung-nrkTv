@@ -207,7 +207,15 @@ var Player = (function () {
     var asset = manifest.playable.assets && manifest.playable.assets[0];
     if (!asset) { busy(false); showMsg('Fant ingen strøm for dette innholdet.'); return; }
 
-    video.src = asset.url;
+    var forId = state.id;
+    attachSource(asset.url).then(function () {
+      if (!state || state.id !== forId) return;
+      var pr = video.play();
+      if (pr && pr.catch) pr.catch(function (e) { console.warn('play() rejected', e); });
+    }).catch(function (e) {
+      busy(false);
+      showMsg('Kunne ikke starte avspilling. ' + e.message);
+    });
     loadSubtitles(manifest.playable.subtitles);
 
     var resumeAt = 0;
@@ -224,8 +232,56 @@ var Player = (function () {
       };
       video.addEventListener('loadedmetadata', once);
     }
-    var pr = video.play();
-    if (pr && pr.catch) pr.catch(function (e) { console.warn('play() rejected', e); });
+  }
+
+  /* ---------- stream source ---------- */
+
+  // Samsung TVs (and Safari) play HLS natively. Desktop Chrome/Firefox/Edge don't, so there the
+  // player loads hls.js on demand. It is never downloaded on the TV.
+  var HLS_JS_URL = 'https://cdn.jsdelivr.net/npm/hls.js@1.7.4/dist/hls.min.js';
+  var hls = null, hlsLoading = null;
+
+  function needsHlsJs() {
+    if (API.IS_TIZEN) return false;
+    var hasMse = !!(window.MediaSource || window.ManagedMediaSource);
+    // Prefer hls.js wherever MSE exists: some desktop browsers claim native HLS support but fail.
+    return hasMse || !video.canPlayType('application/vnd.apple.mpegurl');
+  }
+
+  function loadHlsJs() {
+    if (window.Hls) return Promise.resolve(window.Hls);
+    if (hlsLoading) return hlsLoading;
+    hlsLoading = new Promise(function (resolve, reject) {
+      var s = document.createElement('script');
+      s.src = HLS_JS_URL;
+      s.onload = function () { window.Hls ? resolve(window.Hls) : reject(new Error('hls.js lastet ikke')); };
+      s.onerror = function () { hlsLoading = null; reject(new Error('Kunne ikke laste hls.js')); };
+      document.head.appendChild(s);
+    });
+    return hlsLoading;
+  }
+
+  function attachSource(url) {
+    // NRK's stream CDN allows CORS, so hls.js can fetch directly without the dev proxy.
+    if (!needsHlsJs()) { video.src = url; return Promise.resolve(); }
+    return loadHlsJs().then(function (Hls) {
+      if (!Hls.isSupported()) { video.src = url; return; }
+      destroyHls();
+      hls = new Hls({ enableWorker: true });
+      hls.on(Hls.Events.ERROR, function (ev, data) {
+        if (!data.fatal) return;
+        if (data.type === Hls.ErrorTypes.NETWORK_ERROR && data.details !== 'manifestLoadError') { hls.startLoad(); return; }
+        if (data.type === Hls.ErrorTypes.MEDIA_ERROR) { hls.recoverMediaError(); return; }
+        busy(false);
+        showMsg('Kunne ikke spille av (' + data.details + ').');
+      });
+      hls.loadSource(url);
+      hls.attachMedia(video);
+    });
+  }
+
+  function destroyHls() {
+    if (hls) { hls.destroy(); hls = null; }
   }
 
   function open(info, onClose) {
@@ -262,6 +318,7 @@ var Player = (function () {
     clearTimeout(seekTimer); seekTarget = null;
     clearTimeout(osdTimer);
     video.pause();
+    destroyHls();
     video.removeAttribute('src');
     video.load();
     root.classList.add('hidden');

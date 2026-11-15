@@ -39,8 +39,9 @@ node dev/server.js
 ```
 
 Open http://localhost:8000 in a window of about 1920×1080 and use the arrow keys, Enter and Esc.
-Streams are HLS, which recent Chrome, Edge and Safari play natively. Geoblocked content and the live
-channels only play from a Norwegian IP address.
+Desktop Chrome, Firefox and Edge can't play HLS natively, so in a browser the player loads
+[hls.js](https://github.com/video-dev/hls.js) from jsDelivr on demand (the TV plays HLS itself and never
+loads it). Geoblocked content and the live channels only play from a Norwegian IP address.
 
 ## Install on your Samsung TV
 
