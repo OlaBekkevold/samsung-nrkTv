@@ -1,5 +1,7 @@
 # NRK TV (privat) for Samsung Tizen TVs
 
+> **AI disclaimer:** This is a fully vibecoded project for experimenting with AI programnning. I take no credit for the result but I will keep the repository public in case others find the project useful.
+
 An unofficial NRK TV client for Samsung Smart TVs (Tizen 4.0+, 2018 models and newer), built on NRK's
 public PSAPI. Plain HTML/CSS/JS, with no framework and no build step.
 
